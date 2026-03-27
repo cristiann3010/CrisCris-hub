@@ -1,279 +1,286 @@
--- Criar a ScreenGui
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Name = "SpeedGUI"
-gui.Parent = player:WaitForChild("PlayerGui")
+-- ADICIONE ESTE CÓDIGO AO SEU SCRIPT EXISTENTE
+-- Coloque dentro do mesmo LocalScript, após o código anterior
 
--- Criar o Frame principal
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 200, 0, 150)
-mainFrame.Position = UDim2.new(0, 10, 0, 10)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainFrame.BackgroundTransparency = 0.1
-mainFrame.BorderSizePixel = 2
-mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = gui
+-- ========== SISTEMA DE AUTO COLETA DE MOEDAS ==========
 
--- Adicionar borda arredondada
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
-corner.Parent = mainFrame
+-- Variáveis do sistema de coleta
+local autoCollectEnabled = false
+local collectConnection = nil
+local collectInterval = nil
 
--- Título do Frame
-local title = Instance.new("TextLabel")
-title.Name = "Title"
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-title.BackgroundTransparency = 0.5
-title.Text = "Speed Control"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.Parent = mainFrame
+-- Criar o botão no contentFrame existente
+local autoCollectButton = Instance.new("TextButton")
+autoCollectButton.Name = "AutoCollectButton"
+autoCollectButton.Size = UDim2.new(0.8, 0, 0, 35)
+autoCollectButton.Position = UDim2.new(0.1, 0, 0.45, 0)
+autoCollectButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+autoCollectButton.Text = "🔴 Auto Collect: OFF"
+autoCollectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoCollectButton.Font = Enum.Font.GothamBold
+autoCollectButton.TextSize = 14
+autoCollectButton.Parent = contentFrame
 
--- Botão Minimizar/Maximizar
-local minimizeButton = Instance.new("TextButton")
-minimizeButton.Name = "MinimizeButton"
-minimizeButton.Size = UDim2.new(0, 30, 0, 30)
-minimizeButton.Position = UDim2.new(1, -35, 0, 0)
-minimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-minimizeButton.Text = "−"
-minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-minimizeButton.Font = Enum.Font.GothamBold
-minimizeButton.TextSize = 20
-minimizeButton.Parent = mainFrame
+-- Arredondar botão
+local buttonCorner3 = Instance.new("UICorner")
+buttonCorner3.CornerRadius = UDim.new(0, 4)
+buttonCorner3.Parent = autoCollectButton
 
--- Corner do botão minimizar
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.CornerRadius = UDim.new(0, 4)
-buttonCorner.Parent = minimizeButton
+-- Ajustar posição dos outros elementos para não sobrepor
+speedValueLabel.Position = UDim2.new(0.1, 0, 0.7, 0)
+instructionLabel.Position = UDim2.new(0.1, 0, 0.85, 0)
 
--- Frame de conteúdo (que será minimizado)
-local contentFrame = Instance.new("Frame")
-contentFrame.Name = "ContentFrame"
-contentFrame.Size = UDim2.new(1, 0, 1, -30)
-contentFrame.Position = UDim2.new(0, 0, 0, 30)
-contentFrame.BackgroundTransparency = 1
-contentFrame.Parent = mainFrame
-
--- Slider para velocidade
-local speedSlider = Instance.new("Frame")
-speedSlider.Name = "SpeedSlider"
-speedSlider.Size = UDim2.new(0.8, 0, 0, 40)
-speedSlider.Position = UDim2.new(0.1, 0, 0.2, 0)
-speedSlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-speedSlider.BackgroundTransparency = 0.5
-speedSlider.Parent = contentFrame
-
-local sliderCorner = Instance.new("UICorner")
-sliderCorner.CornerRadius = UDim.new(0, 4)
-sliderCorner.Parent = speedSlider
-
--- Barra de progresso do slider
-local sliderProgress = Instance.new("Frame")
-sliderProgress.Name = "SliderProgress"
-sliderProgress.Size = UDim2.new(0.5, 0, 1, 0)
-sliderProgress.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-sliderProgress.BackgroundTransparency = 0.3
-sliderProgress.Parent = speedSlider
-
-local progressCorner = Instance.new("UICorner")
-progressCorner.CornerRadius = UDim.new(0, 4)
-progressCorner.Parent = sliderProgress
-
--- Botão do slider (para arrastar)
-local sliderButton = Instance.new("TextButton")
-sliderButton.Name = "SliderButton"
-sliderButton.Size = UDim2.new(0, 20, 1, -4)
-sliderButton.Position = UDim2.new(0.5, -10, 0, 2)
-sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-sliderButton.Text = ""
-sliderButton.Parent = speedSlider
-
-local buttonCorner2 = Instance.new("UICorner")
-buttonCorner2.CornerRadius = UDim.new(1, 0)
-buttonCorner2.Parent = sliderButton
-
--- Label para mostrar o valor da velocidade
-local speedValueLabel = Instance.new("TextLabel")
-speedValueLabel.Name = "SpeedValueLabel"
-speedValueLabel.Size = UDim2.new(0.8, 0, 0, 30)
-speedValueLabel.Position = UDim2.new(0.1, 0, 0.6, 0)
-speedValueLabel.BackgroundTransparency = 1
-speedValueLabel.Text = "Speed: 16"
-speedValueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedValueLabel.Font = Enum.Font.Gotham
-speedValueLabel.TextSize = 16
-speedValueLabel.Parent = contentFrame
-
--- Label de instrução
-local instructionLabel = Instance.new("TextLabel")
-instructionLabel.Size = UDim2.new(0.8, 0, 0, 20)
-instructionLabel.Position = UDim2.new(0.1, 0, 0.8, 0)
-instructionLabel.BackgroundTransparency = 1
-instructionLabel.Text = "Drag to adjust speed"
-instructionLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-instructionLabel.Font = Enum.Font.Gotham
-instructionLabel.TextSize = 12
-instructionLabel.Parent = contentFrame
-
--- Variáveis
-local isMinimized = false
-local originalSize = mainFrame.Size
-local originalContentHeight = contentFrame.Size.Y.Scale
-local currentSpeed = 16 -- Velocidade padrão do Roblox
-
--- Função para salvar a velocidade
-local function saveSpeed(speed)
-    -- Salvar em diferentes lugares para garantir persistência
-    if player:FindFirstChild("SpeedValue") then
-        player.SpeedValue.Value = speed
-    else
-        local speedValue = Instance.new("NumberValue")
-        speedValue.Name = "SpeedValue"
-        speedValue.Value = speed
-        speedValue.Parent = player
+-- Função para encontrar e coletar moedas
+local function collectCoins()
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return
     end
     
-    -- Também salvar no DataStore (opcional, para persistência entre sessões)
-    -- Isso requer configuração de DataStore no servidor
-end
-
--- Função para carregar a velocidade salva
-local function loadSavedSpeed()
-    local savedSpeed = 16
-    if player:FindFirstChild("SpeedValue") then
-        savedSpeed = player.SpeedValue.Value
+    local rootPart = character.HumanoidRootPart
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    
+    -- Procurar por moedas no Workspace
+    -- Em Anime Fighters Simulator, moedas geralmente são partes com nomes como "Coin", "Money", "Cash", etc.
+    local coins = workspace:GetDescendants()
+    
+    local collectedCount = 0
+    local collectionRadius = 15 -- Raio de coleta
+    
+    for _, obj in ipairs(coins) do
+        -- Verificar se é uma moeda (ajuste os nomes conforme necessário)
+        if obj:IsA("BasePart") and obj.Parent and (
+            obj.Name:lower():find("coin") or 
+            obj.Name:lower():find("money") or 
+            obj.Name:lower():find("cash") or
+            obj.Name:lower():find("drop") or
+            obj.Name:lower():find("orb") or
+            (obj:FindFirstChild("TouchInterest") and obj.Parent:FindFirstChild("Value")) -- Para detectar itens coletáveis
+        ) then
+            -- Calcular distância
+            local distance = (rootPart.Position - obj.Position).Magnitude
+            
+            -- Se estiver dentro do raio, coletar
+            if distance <= collectionRadius then
+                -- Simular toque ou coletar diretamente
+                -- Método 1: Simular toque (fire touch)
+                if obj:FindFirstChild("TouchInterest") then
+                    local touchEvent = obj.TouchInterest:Fire(rootPart)
+                end
+                
+                -- Método 2: Teleportar até a moeda (mais agressivo, mas funciona em alguns jogos)
+                -- rootPart.CFrame = obj.CFrame
+                
+                -- Método 3: Procurar por um ClickDetector ou proximidade
+                local clickDetector = obj:FindFirstChildOfClass("ClickDetector")
+                if clickDetector then
+                    clickDetector:Click()
+                end
+                
+                -- Método 4: Verificar se tem uma função de coleta no servidor
+                local collectFunction = obj:FindFirstChild("Collect")
+                if collectFunction and typeof(collectFunction) == "function" then
+                    collectFunction:Invoke(player)
+                end
+                
+                collectedCount = collectedCount + 1
+            end
+        end
     end
-    return savedSpeed
+    
+    if collectedCount > 0 then
+        -- Atualizar visualização (opcional)
+        autoCollectButton.Text = "🟢 Auto Collect: ON (" .. collectedCount .. ")"
+        wait(0.5)
+        autoCollectButton.Text = "🟢 Auto Collect: ON"
+    end
 end
 
--- Função para aplicar velocidade ao personagem
-local function applySpeed(speed)
+-- Função para iniciar a coleta automática
+local function startAutoCollect()
+    if autoCollectEnabled then
+        return
+    end
+    
+    autoCollectEnabled = true
+    autoCollectButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    autoCollectButton.Text = "🟢 Auto Collect: ON"
+    
+    -- Coletar a cada 0.5 segundos
+    collectInterval = game:GetService("RunService").Heartbeat:Connect(function()
+        if autoCollectEnabled and player.Character then
+            collectCoins()
+        end
+    end)
+    
+    -- Também conectar ao movimento do personagem (opcional)
     local character = player.Character
     if character then
         local humanoid = character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = speed
+            collectConnection = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+                if autoCollectEnabled then
+                    collectCoins()
+                end
+            end)
         end
     end
-end
-
--- Função para atualizar o slider visualmente
-local function updateSliderVisual(value)
-    local minSpeed = 16
-    local maxSpeed = 100
-    local normalizedValue = (value - minSpeed) / (maxSpeed - minSpeed)
-    sliderProgress.Size = UDim2.new(normalizedValue, 0, 1, 0)
-    sliderButton.Position = UDim2.new(normalizedValue, -10, 0, 2)
-    speedValueLabel.Text = "Speed: " .. math.floor(value)
-end
-
--- Função para atualizar velocidade
-local function updateSpeed(speed)
-    speed = math.clamp(speed, 16, 100)
-    currentSpeed = speed
-    saveSpeed(speed)
-    applySpeed(speed)
-    updateSliderVisual(speed)
-end
-
--- Carregar velocidade salva
-local savedSpeed = loadSavedSpeed()
-updateSpeed(savedSpeed)
-
--- Conectar com o reset do personagem
-player.CharacterAdded:Connect(function(character)
-    wait(0.5) -- Aguardar o humanoid carregar
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.WalkSpeed = currentSpeed
-    end
     
-    -- Conectar para quando o humanoid for adicionado
-    character.ChildAdded:Connect(function(child)
-        if child:IsA("Humanoid") then
-            child.WalkSpeed = currentSpeed
+    -- Conectar quando personagem respawnar
+    local characterAddedConnection
+    characterAddedConnection = player.CharacterAdded:Connect(function(character)
+        wait(0.5)
+        if autoCollectEnabled then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                if collectConnection then
+                    collectConnection:Disconnect()
+                end
+                collectConnection = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+                    if autoCollectEnabled then
+                        collectCoins()
+                    end
+                end)
+            end
         end
     end)
-end)
-
--- Lógica do slider arrastável
-local dragging = false
-local sliderButton = sliderButton
-
-sliderButton.MouseButton1Down:Connect(function()
-    dragging = true
-end)
-
-game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
-game:GetService("RunService").RenderStepped:Connect(function()
-    if dragging then
-        local mouse = player:GetMouse()
-        local sliderFrame = speedSlider
-        local relativeX = mouse.X - sliderFrame.AbsolutePosition.X
-        local width = sliderFrame.AbsoluteSize.X
-        local percent = math.clamp(relativeX / width, 0, 1)
-        
-        local minSpeed = 16
-        local maxSpeed = 100
-        local newSpeed = minSpeed + (maxSpeed - minSpeed) * percent
-        
-        updateSpeed(newSpeed)
-    end
-end)
-
--- Botão minimizar/maximizar
-local function toggleMinimize()
-    isMinimized = not isMinimized
     
-    if isMinimized then
-        mainFrame.Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 30)
-        contentFrame.Visible = false
-        minimizeButton.Text = "+"
-    else
-        mainFrame.Size = originalSize
-        contentFrame.Visible = true
-        minimizeButton.Text = "−"
+    -- Armazenar conexões para depois desconectar
+    if not player:FindFirstChild("AutoCollectData") then
+        local data = Instance.new("Folder")
+        data.Name = "AutoCollectData"
+        data.Parent = player
+    end
+    
+    player.AutoCollectData:SetAttribute("CharacterConnection", characterAddedConnection)
+end
+
+-- Função para parar a coleta automática
+local function stopAutoCollect()
+    if not autoCollectEnabled then
+        return
+    end
+    
+    autoCollectEnabled = false
+    autoCollectButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    autoCollectButton.Text = "🔴 Auto Collect: OFF"
+    
+    -- Desconectar eventos
+    if collectInterval then
+        collectInterval:Disconnect()
+        collectInterval = nil
+    end
+    
+    if collectConnection then
+        collectConnection:Disconnect()
+        collectConnection = nil
+    end
+    
+    if player:FindFirstChild("AutoCollectData") then
+        local charConnection = player.AutoCollectData:GetAttribute("CharacterConnection")
+        if charConnection then
+            charConnection:Disconnect()
+        end
     end
 end
 
-minimizeButton.MouseButton1Click:Connect(toggleMinimize)
-
--- Tornar o frame arrastável pelo título
-local draggingFrame = false
-local dragStart
-local frameStart
-
-title.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingFrame = true
-        dragStart = input.Position
-        frameStart = mainFrame.Position
+-- Função para alternar o auto collect
+local function toggleAutoCollect()
+    if autoCollectEnabled then
+        stopAutoCollect()
+    else
+        startAutoCollect()
     end
+end
+
+-- Conectar botão
+autoCollectButton.MouseButton1Click:Connect(toggleAutoCollect)
+
+-- Função melhorada para detectar drops de NPCs (quando você elimina um)
+local function setupDropDetection()
+    -- Detectar quando um NPC é eliminado
+    local function checkForDrops()
+        -- Procurar por novos objetos no workspace
+        local newObjects = {}
+        
+        -- Usar DescendantAdded para detectar novos itens
+        workspace.DescendantAdded:Connect(function(descendant)
+            if autoCollectEnabled and descendant:IsA("BasePart") then
+                -- Verificar se é uma moeda/item coletável
+                local isCollectable = false
+                
+                if descendant.Name:lower():find("coin") or 
+                   descendant.Name:lower():find("money") or 
+                   descendant.Name:lower():find("cash") or
+                   descendant.Name:lower():find("drop") then
+                    isCollectable = true
+                end
+                
+                -- Verificar por partes com brilho (comum em drops)
+                if descendant:FindFirstChild("PointLight") or descendant:FindFirstChild("Sparkles") then
+                    isCollectable = true
+                end
+                
+                -- Verificar se tem um valor associado (moedas geralmente têm)
+                if descendant:FindFirstChild("Value") or descendant:FindFirstChild("MoneyValue") then
+                    isCollectable = true
+                end
+                
+                if isCollectable then
+                    -- Coletar imediatamente
+                    local character = player.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local rootPart = character.HumanoidRootPart
+                        local distance = (rootPart.Position - descendant.Position).Magnitude
+                        
+                        if distance <= 20 then
+                            -- Tentar coletar
+                            if descendant:FindFirstChild("TouchInterest") then
+                                descendant.TouchInterest:Fire(rootPart)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+    
+    checkForDrops()
+end
+
+-- Iniciar detecção de drops
+setupDropDetection()
+
+-- Salvar estado do auto collect (opcional)
+local function saveAutoCollectState()
+    if player:FindFirstChild("AutoCollectState") then
+        player.AutoCollectState.Value = autoCollectEnabled
+    else
+        local stateValue = Instance.new("BoolValue")
+        stateValue.Name = "AutoCollectState"
+        stateValue.Value = autoCollectEnabled
+        stateValue.Parent = player
+    end
+end
+
+-- Carregar estado salvo
+local function loadAutoCollectState()
+    if player:FindFirstChild("AutoCollectState") then
+        local savedState = player.AutoCollectState.Value
+        if savedState then
+            startAutoCollect()
+        end
+    end
+end
+
+-- Carregar estado automaticamente quando o script iniciar
+wait(1)
+loadAutoCollectState()
+
+-- Salvar estado quando o jogador sair
+player.AncestryChanged:Connect(function()
+    saveAutoCollectState()
 end)
 
-title.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingFrame = false
-    end
-end)
+print("Auto Collect System Loaded!")
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if draggingFrame and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(frameStart.X.Scale, frameStart.X.Offset + delta.X, 
-                                        frameStart.Y.Scale, frameStart.Y.Offset + delta.Y)
-    end
-end)
-
-print("Speed GUI loaded! Speed will persist after reset.")
+-- ========== FIM DO SISTEMA DE AUTO COLETA ==========
